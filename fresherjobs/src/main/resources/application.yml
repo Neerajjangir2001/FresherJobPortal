@@ -1,0 +1,63 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: ${EMAIL}
+    password: ${EMAIL_PASSWORD}
+
+    properties:
+      mail:
+        debug: false
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+            port: 465
+          connectiontimeout: 20000
+          timeout: 20000
+          writetimeout: 20000
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 15MB
+
+fronted:
+  url: ${FRONTED_URL}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 86400000  # 24 hours in milliseconds
+
+logging:
+  level:
+    com.fresherjobs: DEBUG
+    org.springframework.security: INFO
+
+cloudinary:
+  cloud-name: ${CLOUD_NAME}
+  api-key: ${API_KEY}
+  api-secret: ${API_SECRET}

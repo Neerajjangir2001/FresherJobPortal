@@ -1,0 +1,95 @@
+.admin-dashboard {
+    padding: var(--space-2xl) 0;
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: var(--space-2xl);
+    padding: 4px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    width: fit-content;
+}
+
+.admin-tab {
+    padding: 0.6rem 1.4rem;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.admin-tab:hover {
+    color: var(--text-primary);
+}
+
+.admin-tab.active {
+    color: white;
+    background: var(--gradient-primary);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-table th {
+    padding: var(--space-md) var(--space-lg);
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-table td {
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-sm);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-table tbody tr:hover td {
+    background: #faf8ff;
+}
+
+.admin-table .actions-cell {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+@media (max-width: 768px) {
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .admin-tabs {
+        width: 100%;
+    }
+
+    .admin-tab {
+        flex: 1;
+        text-align: center;
+    }
+}

@@ -1,0 +1,47 @@
+.jobs-page {
+    padding: var(--space-2xl) 0;
+}
+
+.jobs-search-bar {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
+    flex-wrap: wrap;
+    padding: var(--space-lg);
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.jobs-search-bar .search-input {
+    flex: 1;
+    min-width: 250px;
+}
+
+.jobs-search-bar select {
+    min-width: 160px;
+}
+
+.jobs-count {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--space-lg);
+    font-weight: 500;
+}
+
+.jobs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+    .jobs-search-bar {
+        flex-direction: column;
+    }
+
+    .jobs-grid {
+        grid-template-columns: 1fr;
+    }
+}
