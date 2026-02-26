@@ -17,7 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -79,11 +81,11 @@ public class AuthService {
         }
 
         public AuthResponse login(LoginRequest request) {
+                User user = userRepository.findByEmail(request.getEmail())
+                                .orElseThrow(() -> new ResourceNotFoundException("User not available "));
+
                 authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-
-                User user = userRepository.findByEmail(request.getEmail())
-                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
                 String token = jwtUtil.generateToken(user);
 
@@ -96,5 +98,40 @@ public class AuthService {
                                 .role(user.getRole())
                                 .isApproved(user.getIsApproved())
                                 .build();
+        }
+
+        @Transactional
+        public void forgotPassword(String email) {
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "User not found with email: " + email));
+
+                String token = UUID.randomUUID().toString();
+                user.setResetPasswordToken(token);
+                user.setResetPasswordTokenExpiry(LocalDateTime.now().plusHours(1));
+
+                userRepository.save(user);
+
+                emailService.sendHtmlEmail(
+                                user.getEmail(),
+                                "Password Reset Request",
+                                "password-reset",
+                                Map.of("userName", user.getName(), "resetLink", "/reset-password/" + token));
+        }
+
+        @Transactional
+        public void resetPassword(String token, String newPassword) {
+                User user = userRepository.findByResetPasswordToken(token)
+                                .orElseThrow(() -> new IllegalArgumentException("Invalid password reset token"));
+
+                if (user.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
+                        throw new IllegalArgumentException("Password reset token has expired");
+                }
+
+                user.setPassword(passwordEncoder.encode(newPassword));
+                user.setResetPasswordToken(null);
+                user.setResetPasswordTokenExpiry(null);
+
+                userRepository.save(user);
         }
 }

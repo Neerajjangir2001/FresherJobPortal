@@ -31,7 +31,7 @@ const RecruiterDashboard = () => {
             await jobsAPI.delete(id);
             setJobs((prev) => prev.filter((j) => j.id !== id));
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to delete job');
+            alert(err.message || 'Failed to delete job');
         }
     };
 
@@ -43,7 +43,7 @@ const RecruiterDashboard = () => {
             logout();
             navigate('/');
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to delete account');
+            alert(err.message || 'Failed to delete account');
         }
     };
 

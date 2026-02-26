@@ -5,6 +5,8 @@
 /Users/neerajjangir/Documents/fresher_job_portal/fresherjobs/src/main/java/com/fresherjobs/enums/NotifType.java
 /Users/neerajjangir/Documents/fresher_job_portal/fresherjobs/src/main/java/com/fresherjobs/entity/Job.java
 /Users/neerajjangir/Documents/fresher_job_portal/fresherjobs/src/main/java/com/fresherjobs/repository/NotificationRepository.java
+/Users/neerajjangir/Documents/fresher_job_portal/fresherjobs/src/main/java/com/fresherjobs/dto/request/ForgotPasswordRequest.java
+/Users/neerajjangir/Documents/fresher_job_portal/fresherjobs/src/main/java/com/fresherjobs/dto/request/ResetPasswordRequest.java
 /Users/neerajjangir/Documents/fresher_job_portal/fresherjobs/src/main/java/com/fresherjobs/entity/JobCategory.java
 /Users/neerajjangir/Documents/fresher_job_portal/fresherjobs/src/main/java/com/fresherjobs/controller/UserController.java
 /Users/neerajjangir/Documents/fresher_job_portal/fresherjobs/src/main/java/com/fresherjobs/dto/response/JobResponse.java

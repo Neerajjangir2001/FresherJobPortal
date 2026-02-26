@@ -81,7 +81,7 @@ const JobDetail = () => {
             setApplySuccess(true);
             setShowModal(false);
         } catch (err) {
-            setApplyError(err.response?.data?.message || 'Failed to submit application');
+            setApplyError(err.message || 'Failed to submit application');
         } finally {
             setApplyLoading(false);
         }

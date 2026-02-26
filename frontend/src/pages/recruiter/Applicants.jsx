@@ -33,7 +33,7 @@ const Applicants = () => {
                 prev.map((a) => (a.id === appId ? { ...a, status: response.data.status } : a))
             );
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to update status');
+            alert(err.message || 'Failed to update status');
         }
     };
 

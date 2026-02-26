@@ -30,7 +30,7 @@ const Login = () => {
                 default: navigate('/');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Invalid email or password');
+            setError(err.message || 'Invalid email or password');
         } finally {
             setLoading(false);
         }
@@ -81,6 +81,9 @@ const Login = () => {
                             >
                                 {showPass ? <HiEyeOff /> : <HiEye />}
                             </button>
+                        </div>
+                        <div style={{ textAlign: 'right', marginTop: '8px' }}>
+                            <Link to="/forgot-password" style={{ fontSize: '0.9rem', color: '#4a90e2', textDecoration: 'none' }}>Forgot Password?</Link>
                         </div>
                     </div>
 

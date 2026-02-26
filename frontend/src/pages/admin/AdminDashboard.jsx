@@ -36,7 +36,7 @@ const AdminDashboard = () => {
                 prev.map((r) => (r.id === id ? res.data : r))
             );
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to approve');
+            alert(err.message || 'Failed to approve');
         }
     };
 
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
             await adminAPI.removeJob(id);
             setJobs((prev) => prev.filter((j) => j.id !== id));
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to remove');
+            alert(err.message || 'Failed to remove');
         }
     };
 

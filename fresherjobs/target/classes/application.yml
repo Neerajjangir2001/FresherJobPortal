@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT}
 
 spring:
   datasource:
@@ -20,7 +20,7 @@ spring:
 
   mail:
     host: smtp.gmail.com
-    port: 465
+    port: 587
     username: ${EMAIL}
     password: ${EMAIL_PASSWORD}
 

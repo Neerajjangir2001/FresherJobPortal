@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiCloudUpload, HiCheck, HiPhotograph, HiEye, HiTrash } from 'react-icons/hi';
+import { HiCloudUpload, HiCheck, HiPhotograph, HiEye, HiTrash, HiExclamation } from 'react-icons/hi';
 import { profileAPI, filesAPI, userAPI } from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
 import PdfViewer from '../../components/PdfViewer';
@@ -23,6 +23,8 @@ const SeekerProfile = () => {
     const [resumeFile, setResumeFile] = useState(null);
     const [resumeUploading, setResumeUploading] = useState(false);
     const [photoUploading, setPhotoUploading] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const resumeInputRef = useRef(null);
     const photoInputRef = useRef(null);
     const [showResume, setShowResume] = useState(false);
@@ -44,8 +46,11 @@ const SeekerProfile = () => {
                     profilePhoto: p.profilePhoto || '',
                     about: p.about || '',
                 });
-            } catch {
-                // No profile yet
+            } catch (err) {
+                // Profile not found is OK for new users, but show other errors
+                if (err.response?.status !== 404) {
+                    setMessage({ type: 'error', text: err.message || 'Failed to load profile' });
+                }
             } finally {
                 setLoading(false);
             }
@@ -68,8 +73,8 @@ const SeekerProfile = () => {
             const res = await filesAPI.uploadResume(file);
             setForm((prev) => ({ ...prev, resumeUrl: res.data.url }));
             setMessage({ type: 'success', text: `Resume "${res.data.filename}" uploaded!` });
-        } catch {
-            setMessage({ type: 'error', text: 'Failed to upload resume' });
+        } catch (err) {
+            setMessage({ type: 'error', text: err.message || 'Failed to upload resume' });
             setResumeFile(null);
         } finally {
             setResumeUploading(false);
@@ -85,22 +90,26 @@ const SeekerProfile = () => {
             const res = await filesAPI.uploadPhoto(file);
             setForm((prev) => ({ ...prev, profilePhoto: res.data.url }));
             setMessage({ type: 'success', text: 'Profile photo uploaded!' });
-        } catch {
-            setMessage({ type: 'error', text: 'Failed to upload photo' });
+        } catch (err) {
+            setMessage({ type: 'error', text: err.message || 'Failed to upload photo' });
         } finally {
             setPhotoUploading(false);
         }
     };
 
     const handleDeleteAccount = async () => {
-        if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
+        setShowDeleteModal(false);
+        setDeleting(true);
+        setMessage({ type: '', text: '' });
 
         try {
             await userAPI.deleteAccount();
             logout();
             navigate('/');
         } catch (err) {
-            setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to delete account' });
+            setMessage({ type: 'error', text: err.message || 'Failed to delete account' });
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -115,10 +124,14 @@ const SeekerProfile = () => {
                 cgpa: form.cgpa ? Number(form.cgpa) : null,
             };
             await profileAPI.createOrUpdate(payload);
-            setMessage({ type: 'success', text: 'Profile saved successfully! 🎉' });
+            setMessage({ type: 'success', text: 'Profile saved successfully! 🎉 Redirecting to dashboard...' });
+
+            // Redirect to dashboard after 1.5s
+            setTimeout(() => {
+                navigate('/seeker/dashboard');
+            }, 1500);
         } catch (err) {
-            setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to save profile' });
-        } finally {
+            setMessage({ type: 'error', text: err.message || 'Failed to save profile' });
             setSaving(false);
         }
     };
@@ -289,10 +302,11 @@ const SeekerProfile = () => {
                         <button
                             type="button"
                             className="btn btn-danger"
-                            onClick={handleDeleteAccount}
+                            onClick={() => setShowDeleteModal(true)}
+                            disabled={deleting}
                             style={{ width: '100%' }}
                         >
-                            <HiTrash /> Delete Account
+                            <HiTrash /> {deleting ? 'Deleting Account...' : 'Delete Account'}
                         </button>
                     </div>
                 </form>
@@ -305,6 +319,86 @@ const SeekerProfile = () => {
                     onClose={() => setShowResume(false)}
                     title={resumeFile?.name || 'Resume'}
                 />
+            )}
+            {/* Delete Confirm Modal */}
+            {showDeleteModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(8px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 9999
+                }} onClick={() => setShowDeleteModal(false)}>
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: '#ffffff', borderRadius: '20px',
+                            padding: '2.5rem 2rem 2rem', maxWidth: '400px', width: '90%',
+                            boxShadow: '0 25px 80px rgba(0, 0, 0, 0.4)',
+                            textAlign: 'center', position: 'relative'
+                        }}
+                    >
+                        {/* Warning Icon */}
+                        <div style={{
+                            width: '64px', height: '64px', borderRadius: '50%',
+                            background: '#fef2f2', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 1.25rem',
+                            border: '2px solid #fecaca'
+                        }}>
+                            <HiExclamation style={{ fontSize: '32px', color: '#dc2626' }} />
+                        </div>
+
+                        {/* Title */}
+                        <h3 style={{
+                            margin: '0 0 0.5rem', fontSize: '1.3rem',
+                            fontWeight: 700, color: '#111827', letterSpacing: '-0.01em'
+                        }}>
+                            Delete Your Account?
+                        </h3>
+
+                        {/* Description */}
+                        <p style={{
+                            margin: '0 0 2rem', color: '#6b7280',
+                            fontSize: '0.875rem', lineHeight: '1.6'
+                        }}>
+                            This will permanently delete your profile, resume, and all job applications.
+                            This action <span style={{ color: '#dc2626', fontWeight: 600 }}>cannot be undone</span>.
+                        </p>
+
+                        {/* Buttons */}
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                style={{
+                                    flex: 1, padding: '0.8rem 1rem', borderRadius: '12px',
+                                    border: '1.5px solid #e5e7eb', background: '#f9fafb',
+                                    color: '#374151', cursor: 'pointer', fontSize: '0.9rem',
+                                    fontWeight: 600, transition: 'all 0.2s ease',
+                                    letterSpacing: '0.01em'
+                                }}
+                                onMouseEnter={(e) => { e.target.style.background = '#f3f4f6'; e.target.style.borderColor = '#d1d5db'; }}
+                                onMouseLeave={(e) => { e.target.style.background = '#f9fafb'; e.target.style.borderColor = '#e5e7eb'; }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteAccount}
+                                style={{
+                                    flex: 1, padding: '0.8rem 1rem', borderRadius: '12px',
+                                    border: 'none', background: '#dc2626',
+                                    color: '#ffffff', cursor: 'pointer', fontSize: '0.9rem',
+                                    fontWeight: 600, transition: 'all 0.2s ease',
+                                    letterSpacing: '0.01em',
+                                    boxShadow: '0 4px 14px rgba(220, 38, 38, 0.35)'
+                                }}
+                                onMouseEnter={(e) => { e.target.style.background = '#b91c1c'; }}
+                                onMouseLeave={(e) => { e.target.style.background = '#dc2626'; }}
+                            >
+                                Yes, Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

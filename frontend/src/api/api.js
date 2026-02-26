@@ -21,10 +21,11 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor — handle 401
+// Response interceptor — handle 401 & normalize errors
 api.interceptors.response.use(
     (response) => response,
     (error) => {
+        // Handle 401 Unauthorized
         if (error.response?.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
@@ -32,6 +33,26 @@ api.interceptors.response.use(
                 window.location.href = '/login';
             }
         }
+
+        // Normalize Error Messages globally so components don't have to guess
+        let normalizedMessage = 'An unexpected error occurred';
+        if (error.response?.data) {
+            const data = error.response.data;
+            if (data.fieldErrors && Object.keys(data.fieldErrors).length > 0) {
+                // E.g., { "password": "must be 6 chars", "email": "invalid" }
+                normalizedMessage = Object.values(data.fieldErrors).join('. ');
+            } else if (data.message) {
+                normalizedMessage = data.message;
+            } else if (typeof data === 'string') {
+                normalizedMessage = data;
+            }
+        } else if (error.message) {
+            normalizedMessage = error.message; // Client side error like Network Error
+        }
+
+        // Attach the message directly to the error object so components can just use err.message
+        error.message = normalizedMessage;
+
         return Promise.reject(error);
     }
 );
@@ -40,6 +61,8 @@ api.interceptors.response.use(
 export const authAPI = {
     register: (data) => api.post('/auth/register', data),
     login: (data) => api.post('/auth/login', data),
+    forgotPassword: (data) => api.post('/auth/forgot-password', data),
+    resetPassword: (data) => api.post('/auth/reset-password', data),
 };
 
 // ============ Jobs API ============

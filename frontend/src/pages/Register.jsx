@@ -46,13 +46,7 @@ const Register = () => {
                 default: navigate('/');
             }
         } catch (err) {
-            const data = err.response?.data;
-            if (data?.fieldErrors) {
-                const msgs = Object.values(data.fieldErrors).join('. ');
-                setError(msgs);
-            } else {
-                setError(data?.message || 'Registration failed. Please try again.');
-            }
+            setError(err.message || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }

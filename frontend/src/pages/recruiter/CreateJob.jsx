@@ -43,12 +43,7 @@ const CreateJob = () => {
             await jobsAPI.create(payload);
             navigate('/recruiter/dashboard');
         } catch (err) {
-            const data = err.response?.data;
-            if (data?.fieldErrors) {
-                setError(Object.values(data.fieldErrors).join('. '));
-            } else {
-                setError(data?.message || 'Failed to create job');
-            }
+            setError(err.message || 'Failed to create job');
         } finally {
             setLoading(false);
         }
