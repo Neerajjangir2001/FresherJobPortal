@@ -1,53 +1,63 @@
 package com.fresherjobs.service;
 
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${spring.brevo.api.url}")
+    private String brevoApiUrl;
 
-    @Value("${spring.mail.username}")
+    @Value("${spring.brevo.api.key}")
+    private String apiKey;
+
+    @Value("${spring.brevo.sender.email}")
     private String fromEmail;
+
+    @Value("${spring.brevo.sender.name}")
+    private String fromName;
 
     @Value("${fronted.url}")
     private String frontedUrl;
 
-
+    private final RestTemplate restTemplate = new RestTemplate();
 
     // Send a plain text email asynchronously.
     @Async
     public void sendEmail(String to, String subject, String body) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(body, false);
-            mailSender.send(message);
+            Map<String, Object> payload = Map.of(
+                    "sender", Map.of("name", fromName, "email", fromEmail),
+                    "to", List.of(Map.of("email", to)),
+                    "subject", subject,
+                    "textContent", body);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("api-key", apiKey);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+            restTemplate.postForEntity(brevoApiUrl, request, String.class);
+
             log.info("Email sent to {} — Subject: {}", to, subject);
         } catch (Exception e) {
             log.error("Failed to send email to {}: {}", to, e.getMessage());
         }
     }
 
-
-     // Send a styled HTML email using a template file (async — non-blocking).
+    // Send a styled HTML email using a template file (async — non-blocking).
     @Async
     public void sendHtmlEmail(String to, String subject, String templateName, Map<String, String> variables) {
         try {
@@ -61,20 +71,24 @@ public class EmailService {
             // Always inject site URL
             html = html.replace("{{siteUrl}}", frontedUrl);
 
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromEmail);
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(html, true);
-            mailSender.send(message);
+            Map<String, Object> payload = Map.of(
+                    "sender", Map.of("name", fromName, "email", fromEmail),
+                    "to", List.of(Map.of("email", to)),
+                    "subject", subject,
+                    "htmlContent", html);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("api-key", apiKey);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+            restTemplate.postForEntity(brevoApiUrl, request, String.class);
+
             log.info("HTML email sent to {} — Subject: {} — Template: {}", to, subject, templateName);
         } catch (Exception e) {
             log.error("Failed to send HTML email to {}: {}", to, e.getMessage());
         }
     }
-
-
 
     // Load an HTML template file from classpath: resources/templates/{name}.html
     private String loadTemplate(String templateName) throws IOException {

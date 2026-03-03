@@ -18,25 +18,14 @@ spring:
         format_sql: true
 
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${EMAIL}
-    password: ${EMAIL_PASSWORD}
+  brevo:
+    api:
+      key: ${BREVO_API_KEY}
+      url: ${BREVO_API_URL}
+    sender:
+      email: ${SENDER_EMAIL}
+      name: FresherJobPortal
 
-    properties:
-      mail:
-        debug: false
-        smtp:
-          auth: true
-          ssl:
-            enable: true
-          socketFactory:
-            class: javax.net.ssl.SSLSocketFactory
-            port: 465
-          connectiontimeout: 20000
-          timeout: 20000
-          writetimeout: 20000
 
   servlet:
     multipart:
